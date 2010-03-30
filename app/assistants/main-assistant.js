@@ -1,0 +1,207 @@
+function MainAssistant() {
+	/* this is the creator function for your scene assistant object. It will be passed all the 
+	   additional parameters (after the scene name) that were passed to pushScene. The reference
+	   to the scene controller (this.controller) has not be established yet, so any initialization
+	   that needs the scene controller should be done in the setup function below. */
+}
+
+MainAssistant.prototype.setup = function() {
+	//$("debug").innerHTML="it is really so easy?";
+	/* this function is for setup tasks that have to happen when the scene is first created */
+		
+	/* use Mojo.View.render to render view templates and add them to the scene, if needed */
+	
+	/* setup widgets here */
+	
+	/* add event handlers to listen to events from widgets */
+
+	this.appMenuModel = {
+		visible: true,
+		items: [
+			{ label: $L("About"), command: 'about' }
+		]
+	};
+	
+	this.controller.setupWidget(Mojo.Menu.appMenu, {omitDefaultItems: true}, this.appMenuModel);
+
+	this.controller.setupWidget("spinnerId",
+        this.attributes = {
+            spinnerSize: "large"
+        },
+        this.model = {
+            spinning: true 
+        }
+    	); 
+
+
+	wordList = [];
+
+	listModel = {listTitle:$L('Wikiplaces next to you'), items:wordList};
+
+        // Set up the attributes & model for the List widget:
+        this.controller.setupWidget('plist',
+                                    this.attributes = {itemTemplate:'main/listitem', listTemplate:'main/listcontainer', emptyTemplate:'main/emptylist'},
+                                     listModel);
+
+
+
+	//this.controller.listen(this.controller.get('getcords'),Mojo.Event.tap, this.getcordsButtonPressed.bind(this));
+	this.controller.listen("plist", Mojo.Event.listTap, this.plistTapped.bindAsEventListener(this));
+	this.getcordsButtonPressed();
+
+};
+
+MainAssistant.prototype.plistTapped = function(event) {
+//Mojo.Controller.errorDialog(places[event.index].link);
+/*this.controller.serviceRequest("palm://com.palm.applicationManager", {
+   method: "open",
+   parameters:  {
+       id: 'com.palm.app.browser',
+       params: {
+           target: places[event.index].link
+       }
+   }
+ });*/
+
+};
+
+
+MainAssistant.prototype.getcordsButtonPressed = function(event) {
+this.controller.serviceRequest('palm://com.palm.location', {
+    method:"getCurrentPosition",
+    parameters:{},
+    onSuccess:this.GPSsuccess.bind(this),
+    onFailure:this.GPSfail.bind(this)
+    }
+); 
+
+};
+
+MainAssistant.prototype.GPSsuccess = function(response) {
+this.poslon = response.longitude;
+this.poslat = response.latitude;
+var url = "http://toolserver.org/~dispenser/cgi-bin/locateCoord.py?dbname=coord_enwiki&lon="+response.longitude+"&lat="+response.latitude+"&range_km=10";
+var request = new Ajax.Request(url, {
+method: 'get',
+onSuccess: this.request1Success.bind(this),
+onFailure: this.request1Failure.bind(this)
+}); 
+
+};
+MainAssistant.prototype.request1Success = function(webresponse) {
+//$("debug").innerText=webresponse.responseText;
+
+var worktext = webresponse.responseText;
+worktext = worktext.split("<!--RESULTS-->");
+worktext = worktext[1];
+worktext = worktext.split("<!--/RESULTS-->");
+worktext = worktext[0];
+//$("debug").innerText=worktext;
+
+var worklines =  worktext.split("<tr");
+//$("debug").innerText= worklines[1];
+
+places = [];
+
+for (i=1;i<worklines.length;i++) {
+
+var workline = worklines[i];
+
+var lati = workline.split("</td>");
+lati = lati[0].split("<td>");
+lati = lati[1];
+
+var longi = workline.split("</td>");
+longi = longi[1].split("<td>");
+longi = longi[1];
+
+var link = workline.split("href=\"");
+link = link[1].split("</a>");
+link = link[0];
+
+var desc = link.split("\">");
+link = desc[0];
+desc = desc[1];
+
+var distance = this.getDistance(this.poslon,this.poslat,longi,lati);
+//$dist = sin($lat1) * sin($lat2) + cos($lat1)	* cos($lat2) * cos($lon1 - $lon2);
+distance = Math.round(distance * 1000.0*0.000621371192*1000.0)/1000.0;
+
+var splitdesc = desc.split(" ");
+for (ii=0; ii<splitdesc.length;ii++){
+	if (splitdesc[ii].length > 20) splitdesc[ii] = splitdesc[ii].substring(0,20) + "-" + splitdesc[ii].substring(20);
+}
+
+desc = "";
+
+for (j=0; j<splitdesc.length;j++){
+desc = desc + splitdesc[j] + " " ;
+} 
+
+
+//$("debug").innerHTML= lati + "<br>" +longi +"<br>" + desc +"<br>" + link;
+//places.push({dist:dist,lon:longi,lat:lati,link:link,desc:desc});
+if (desc != "[empty string]") places.push({dist:distance,lon:longi,lat:lati,link:link,desc:desc});
+}
+
+places.sort(this.sortNumber);
+
+listModel.items = places;
+this.controller.modelChanged(listModel);
+$("loading").style.display="none";
+//$("debug").innerHTML = places[5].link;
+};
+
+MainAssistant.prototype.sortNumber = function( a, b) {
+if (a.dist > b.dist) return 1;
+if (a.dist < b.dist) return -1;
+if (a.dist == b.dist) return 0;
+};
+
+MainAssistant.prototype.getDistance = function(lon1, lat1, lon2,lat2) {
+		var unit = 6371.0;
+		var degreeRadius = Math.PI / 180.0;
+		lat1  = lat1 * degreeRadius;
+		lon1  = lon1 * degreeRadius;
+		lat2  = lat2 * degreeRadius;
+		lon2  = lon2 * degreeRadius;
+		var distance = Math.sin(lat1) * Math.sin(lat2) + Math.cos(lat1)* Math.cos(lat2) * Math.cos(lon1 - lon2);
+		return (unit * Math.acos(distance));
+};
+
+
+MainAssistant.prototype.request1Failure = function(response) {
+Mojo.Controller.errorDialog( "failed to get content");
+
+};
+
+
+
+MainAssistant.prototype.GPSfail = function(response) {
+Mojo.Controller.errorDialog( "failed to get position");
+
+};
+MainAssistant.prototype.activate = function(event) {
+	/* put in event handlers here that should only be in effect when this scene is active. For
+	   example, key handlers that are observing the document */
+};
+
+MainAssistant.prototype.deactivate = function(event) {
+	/* remove any event handlers you added in activate and do any other cleanup that should happen before
+	   this scene is popped or another scene is pushed on top */
+};
+
+MainAssistant.prototype.cleanup = function(event) {
+	/* this function should do any cleanup needed before the scene is destroyed as 
+	   a result of being popped off the scene stack */
+};
+
+MainAssistant.prototype.handleCommand = function(event){
+    if(event.type == Mojo.Event.command) {	
+		switch (event.command) {
+			case 'about':
+				Mojo.Controller.stageController.pushScene("about");
+				break;
+		}
+	}
+}
