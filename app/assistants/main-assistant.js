@@ -8,11 +8,21 @@ MainAssistant.prototype.setup = function() {
 	this.appMenuModel = {
 		visible: true,
 		items: [
-			{ label: $L("About"), command: 'about' }
+			{ label: $L("About"), command: 'about' },
+			{ label: $L("Preferences"), command: 'preferences' }
 		]
 	};
-	
+
 	this.controller.setupWidget(Mojo.Menu.appMenu, {omitDefaultItems: true}, this.appMenuModel);
+
+	var cookie = new Mojo.Model.Cookie("wppref");
+	var wppref = cookie.get();
+	if(wppref != null)
+	{
+		this.lang = wppref.lang; 
+	} else {
+		this.lang = "en";
+	}
 
 	this.controller.setupWidget("spinnerId",
         this.attributes = {
@@ -22,7 +32,7 @@ MainAssistant.prototype.setup = function() {
             spinning: true 
         }
     	); 
-
+	this.controller.listen($('tryagain'),Mojo.Event.tap, this.getcordsButtonPressed.bind(this));
 
 	wordList = [];
 
@@ -57,6 +67,10 @@ MainAssistant.prototype.plistTapped = function(event) {
 
 
 MainAssistant.prototype.getcordsButtonPressed = function(event) {
+
+$("nowhere").style.display="none";
+$("loading").style.display="block";
+
 this.controller.serviceRequest('palm://com.palm.location', {
     method:"getCurrentPosition",
     parameters:{},
@@ -70,7 +84,7 @@ this.controller.serviceRequest('palm://com.palm.location', {
 MainAssistant.prototype.GPSsuccess = function(response) {
 this.poslon = response.longitude;
 this.poslat = response.latitude;
-var url = "http://toolserver.org/~dispenser/cgi-bin/locateCoord.py?dbname=coord_enwiki&lon="+response.longitude+"&lat="+response.latitude+"&range_km=10";
+var url = "http://toolserver.org/~dispenser/cgi-bin/locateCoord.py?dbname=coord_"+this.lang+"wiki&lon="+response.longitude+"&lat="+response.latitude+"&range_km=10";
 var request = new Ajax.Request(url, {
 method: 'get',
 onSuccess: this.request1Success.bind(this),
@@ -115,7 +129,8 @@ desc = desc[1];
 
 var distance = this.getDistance(this.poslon,this.poslat,longi,lati);
 //$dist = sin($lat1) * sin($lat2) + cos($lat1)	* cos($lat2) * cos($lon1 - $lon2);
-distance = Math.round(distance * 1000.0*0.000621371192*1000.0)/1000.0;
+if (this.lang == "en") distance = Math.round(distance * 1000.0*0.000621371192*1000.0)/1000.0;
+else distance = Math.round(distance *1000.0);
 
 var splitdesc = desc.split(" ");
 for (ii=0; ii<splitdesc.length;ii++){
@@ -131,9 +146,19 @@ desc = desc + splitdesc[j] + " " ;
 
 //$("debug").innerHTML= lati + "<br>" +longi +"<br>" + desc +"<br>" + link;
 //places.push({dist:dist,lon:longi,lat:lati,link:link,desc:desc});
-if (desc != "[empty string]") places.push({dist:distance,lon:longi,lat:lati,link:link,desc:desc});
+if (this.lang == "en") {
+	var distanced = distance + " miles";
+	if (desc != "[empty string]") places.push({dist:distance,distd:distanced,lon:longi,lat:lati,link:link,desc:desc});
 }
 
+else {
+	var distanced = distance + " m";
+	if (desc != "[empty string]") places.push({dist:distance,distd:distanced,lon:longi,lat:lati,link:link,desc:desc});
+}
+
+}
+
+if (places.length <= 0) $("nowhere").style.display="block";
 places.sort(this.sortNumber);
 
 listModel.items = places;
@@ -189,6 +214,10 @@ MainAssistant.prototype.handleCommand = function(event){
 			case 'about':
 				Mojo.Controller.stageController.pushScene("about");
 				break;
+			case 'preferences':
+				Mojo.Controller.stageController.pushScene("preferences");
+				break;
+	
 		}
 	}
 }
