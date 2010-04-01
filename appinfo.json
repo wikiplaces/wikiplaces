@@ -1,6 +1,6 @@
 {
 	"id": "de.omoco.wikiplaces",
-	"version": "0.9.0",
+	"version": "0.9.1",
 	"vendor": "wikiplaces.omoco.de",
 	"type": "web",
 	"main": "index.html",
