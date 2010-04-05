@@ -14,10 +14,12 @@ PreferencesAssistant.prototype.setup = function() {
 	var wppref = cookie.get();
 	if(wppref != null)
 	{	
-		this.lang = wppref.lang; 
+		this.lang = wppref.lang;
+		this.radius = wppref.radius;  
 		this.donate = wppref.donate; 
 	} else {
 		this.lang = "en";
+		this.radius = 10;
 		this.donate = true;
 	}
 
@@ -41,6 +43,23 @@ PreferencesAssistant.prototype.setup = function() {
 	this.controller.modelChanged(selectorsModel);
 
 
+	this.radiuschoice = [];
+	selectorsModel2 = { radius: $L(this.radius + " km") };
+
+	this.controller.listen('radiusselector', Mojo.Event.propertyChange, this.selectorChanged2.bindAsEventListener(this));
+	this.controller.setupWidget('radiusselector', {label: $L("Radius"), choices: this.radiuschoice, modelProperty:'radius'}, selectorsModel2);
+	
+	selectorsModel2.choices = [
+		{ label: "1", value:"1" },
+		{ label: "2", value:"2" },
+		{ label: "5", value:"5" },
+		{ label: "10", value:"10" },
+		{ label: "20", value:"20" },
+		{ label: "50", value:"50" },
+	];
+	this.controller.modelChanged(selectorsModel2);
+
+
 	tdattr = {trueLabel: 'yes', falseLabel: 'no'};
 	tdModel = {value: this.donate, disabled: false};
 	
@@ -52,15 +71,27 @@ PreferencesAssistant.prototype.selectorChanged = function(event) {
 	var cookie = new Mojo.Model.Cookie("wppref");
 	cookie.put({
 		lang: event.value,
+		radius: this.radius,
 		donate: tdModel.value,
 	});
 	this.lang = event.value;
+};
+
+PreferencesAssistant.prototype.selectorChanged2 = function(event) {
+	var cookie = new Mojo.Model.Cookie("wppref");
+	cookie.put({
+		lang: this.lang,
+		radius: event.value,
+		donate: tdModel.value,
+	});
+	this.radius = event.value;
 };
 
 PreferencesAssistant.prototype.togglePressed = function(event) {
 	var cookie = new Mojo.Model.Cookie("wppref");
 	cookie.put({
 		lang: this.lang,
+		radius: this.radius,
 		donate: tdModel.value,
 	});
 };

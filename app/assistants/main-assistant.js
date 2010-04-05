@@ -19,10 +19,12 @@ MainAssistant.prototype.setup = function() {
 	var wppref = cookie.get();
 	if(wppref != null)
 	{
-		this.lang = wppref.lang; 
+		this.lang = wppref.lang;
+		this.radius = wppref.radius;
 		this.donate = wppref.donate; 
 	} else {
 		this.lang = "en";
+		this.radius = 10;
 		this.donate = true;
 	}
 
@@ -86,7 +88,7 @@ this.controller.serviceRequest('palm://com.palm.location', {
 MainAssistant.prototype.GPSsuccess = function(response) {
 this.poslon = response.longitude;
 this.poslat = response.latitude;
-var url = "http://toolserver.org/~dispenser/cgi-bin/locateCoord.py?dbname=coord_"+this.lang+"wiki&lon="+response.longitude+"&lat="+response.latitude+"&range_km=10";
+var url = "http://toolserver.org/~dispenser/cgi-bin/locateCoord.py?dbname=coord_"+this.lang+"wiki&lon="+response.longitude+"&lat="+response.latitude+"&range_km=" + this.radius;
 var request = new Ajax.Request(url, {
 method: 'get',
 onSuccess: this.request1Success.bind(this),
