@@ -20,8 +20,10 @@ MainAssistant.prototype.setup = function() {
 	if(wppref != null)
 	{
 		this.lang = wppref.lang; 
+		this.donate = wppref.donate; 
 	} else {
 		this.lang = "en";
+		this.donate = true;
 	}
 
 	this.controller.setupWidget("spinnerId",
@@ -164,6 +166,10 @@ places.sort(this.sortNumber);
 listModel.items = places;
 this.controller.modelChanged(listModel);
 $("loading").style.display="none";
+
+if(this.donate)
+	this.controller.get('donatemessage').style.display = "block";
+
 //$("debug").innerHTML = places[5].link;
 };
 
