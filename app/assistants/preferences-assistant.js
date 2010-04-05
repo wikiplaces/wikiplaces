@@ -50,12 +50,12 @@ PreferencesAssistant.prototype.setup = function() {
 	this.controller.setupWidget('radiusselector', {label: $L("Radius"), choices: this.radiuschoice, modelProperty:'radius'}, selectorsModel2);
 	
 	selectorsModel2.choices = [
-		{ label: "1", value:"1" },
-		{ label: "2", value:"2" },
-		{ label: "5", value:"5" },
-		{ label: "10", value:"10" },
-		{ label: "20", value:"20" },
-		{ label: "50", value:"50" },
+		{ label: "1 km", value:"1" },
+		{ label: "2 km", value:"2" },
+		{ label: "5 km", value:"5" },
+		{ label: "10 km", value:"10" },
+		{ label: "20 km", value:"20" },
+		{ label: "50 km", value:"50" },
 	];
 	this.controller.modelChanged(selectorsModel2);
 
