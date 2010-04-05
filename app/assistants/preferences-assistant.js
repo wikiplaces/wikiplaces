@@ -14,19 +14,19 @@ PreferencesAssistant.prototype.setup = function() {
 	var wppref = cookie.get();
 	if(wppref != null)
 	{	
-		this.lang = wppref.lang;
-		this.radius = wppref.radius;  
+		WIKILANG = wppref.lang;
+		RADIUS = wppref.radius;  
 		this.donate = wppref.donate; 
 	} else {
-		this.lang = "en";
-		this.radius = 10;
+		WIKILANG = "en";
+		RADIUS = 10;
 		this.donate = true;
 	}
 
 	var countryname = "English";
-	if (this.lang == "de" ) countryname = "Deutsch";
-	if (this.lang == "fr" ) countryname = "Francais";
-	if (this.lang == "es" ) countryname = "Espanol";
+	if (WIKILANG == "de" ) countryname = "Deutsch";
+	if (WIKILANG == "fr" ) countryname = "Francais";
+	if (WIKILANG == "es" ) countryname = "Espanol";
 
 	this.langchoice = [];
 	selectorsModel = { langtype: $L(countryname) };
@@ -44,7 +44,7 @@ PreferencesAssistant.prototype.setup = function() {
 
 
 	this.radiuschoice = [];
-	selectorsModel2 = { radius: $L(this.radius + " km") };
+	selectorsModel2 = { radius: $L(RADIUS + " km") };
 
 	this.controller.listen('radiusselector', Mojo.Event.propertyChange, this.selectorChanged2.bindAsEventListener(this));
 	this.controller.setupWidget('radiusselector', {label: $L("Radius"), choices: this.radiuschoice, modelProperty:'radius'}, selectorsModel2);
@@ -71,27 +71,27 @@ PreferencesAssistant.prototype.selectorChanged = function(event) {
 	var cookie = new Mojo.Model.Cookie("wppref");
 	cookie.put({
 		lang: event.value,
-		radius: this.radius,
+		radius: RADIUS,
 		donate: tdModel.value,
 	});
-	this.lang = event.value;
+	WIKILANG = event.value;
 };
 
 PreferencesAssistant.prototype.selectorChanged2 = function(event) {
 	var cookie = new Mojo.Model.Cookie("wppref");
 	cookie.put({
-		lang: this.lang,
+		lang: WIKILANG,
 		radius: event.value,
 		donate: tdModel.value,
 	});
-	this.radius = event.value;
+	RADIUS = event.value;
 };
 
 PreferencesAssistant.prototype.togglePressed = function(event) {
 	var cookie = new Mojo.Model.Cookie("wppref");
 	cookie.put({
-		lang: this.lang,
-		radius: this.radius,
+		lang: WIKILANG,
+		radius: RADIUS,
 		donate: tdModel.value,
 	});
 };

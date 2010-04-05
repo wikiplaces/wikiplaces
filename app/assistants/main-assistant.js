@@ -2,6 +2,9 @@ function MainAssistant() {
 
 }
 
+RADIUS = 10;
+WIKILANG = "en";
+
 MainAssistant.prototype.setup = function() {
 	//$("debug").innerHTML="it is really so easy?";
 
@@ -9,7 +12,8 @@ MainAssistant.prototype.setup = function() {
 		visible: true,
 		items: [
 			{ label: $L("About"), command: 'about' },
-			{ label: $L("Preferences"), command: 'preferences' }
+			{ label: $L("Preferences"), command: 'preferences' },
+			{ label: $L("Look again"), command: 'refresh' }
 		]
 	};
 
@@ -19,12 +23,12 @@ MainAssistant.prototype.setup = function() {
 	var wppref = cookie.get();
 	if(wppref != null)
 	{
-		this.lang = wppref.lang;
-		this.radius = wppref.radius;
+		WIKILANG = wppref.lang;
+		RADIUS = wppref.radius;
 		this.donate = wppref.donate; 
 	} else {
-		this.lang = "en";
-		this.radius = 10;
+		WIKILANG = "en";
+		RADIUS = 10;
 		this.donate = true;
 	}
 
@@ -37,6 +41,7 @@ MainAssistant.prototype.setup = function() {
         }
     	); 
 	this.controller.listen($('tryagain'),Mojo.Event.tap, this.getcordsButtonPressed.bind(this));
+	this.controller.listen($('preferencesbutton'),Mojo.Event.tap, this.preferencesButtonPressed.bind(this));
 
 	wordList = [];
 
@@ -70,10 +75,18 @@ MainAssistant.prototype.plistTapped = function(event) {
 };
 
 
+MainAssistant.prototype.preferencesButtonPressed = function(event){
+	Mojo.Controller.stageController.pushScene("preferences");
+}
+
 MainAssistant.prototype.getcordsButtonPressed = function(event) {
 
 $("nowhere").style.display="none";
+$('donatemessage').style.display = "none";
 $("loading").style.display="block";
+
+listModel.items = [];
+this.controller.modelChanged(listModel);
 
 this.controller.serviceRequest('palm://com.palm.location', {
     method:"getCurrentPosition",
@@ -88,7 +101,7 @@ this.controller.serviceRequest('palm://com.palm.location', {
 MainAssistant.prototype.GPSsuccess = function(response) {
 this.poslon = response.longitude;
 this.poslat = response.latitude;
-var url = "http://toolserver.org/~dispenser/cgi-bin/locateCoord.py?dbname=coord_"+this.lang+"wiki&lon="+response.longitude+"&lat="+response.latitude+"&range_km=" + this.radius;
+var url = "http://toolserver.org/~dispenser/cgi-bin/locateCoord.py?dbname=coord_"+WIKILANG+"wiki&lon="+response.longitude+"&lat="+response.latitude+"&range_km=" + RADIUS;
 var request = new Ajax.Request(url, {
 method: 'get',
 onSuccess: this.request1Success.bind(this),
@@ -133,7 +146,7 @@ desc = desc[1];
 
 var distance = this.getDistance(this.poslon,this.poslat,longi,lati);
 //$dist = sin($lat1) * sin($lat2) + cos($lat1)	* cos($lat2) * cos($lon1 - $lon2);
-if (this.lang == "en") distance = Math.round(distance * 1000.0*0.000621371192*1000.0)/1000.0;
+if (WIKILANG == "en") distance = Math.round(distance * 1000.0*0.000621371192*1000.0)/1000.0;
 else distance = Math.round(distance *1000.0);
 
 var splitdesc = desc.split(" ");
@@ -150,7 +163,7 @@ desc = desc + splitdesc[j] + " " ;
 
 //$("debug").innerHTML= lati + "<br>" +longi +"<br>" + desc +"<br>" + link;
 //places.push({dist:dist,lon:longi,lat:lati,link:link,desc:desc});
-if (this.lang == "en") {
+if (WIKILANG == "en") {
 	var distanced = distance + " miles";
 	if (desc != "[empty string]") places.push({dist:distance,distd:distanced,lon:longi,lat:lati,link:link,desc:desc});
 }
@@ -162,15 +175,20 @@ else {
 
 }
 
-if (places.length <= 0) $("nowhere").style.display="block";
+if(this.donate)
+	this.controller.get('donatemessage').style.display = "block";
+
+if (places.length <= 0) {
+	$("nowhere").style.display = "block";
+	$("donatemessage").style.display = "none";
+}
+
+
 places.sort(this.sortNumber);
 
 listModel.items = places;
 this.controller.modelChanged(listModel);
 $("loading").style.display="none";
-
-if(this.donate)
-	this.controller.get('donatemessage').style.display = "block";
 
 //$("debug").innerHTML = places[5].link;
 };
@@ -225,7 +243,9 @@ MainAssistant.prototype.handleCommand = function(event){
 			case 'preferences':
 				Mojo.Controller.stageController.pushScene("preferences");
 				break;
-	
+			case 'refresh':
+				this.getcordsButtonPressed();
+				break;	
 		}
 	}
 }
