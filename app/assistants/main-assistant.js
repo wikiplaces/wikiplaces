@@ -3,6 +3,7 @@ function MainAssistant() {
 }
 
 RADIUS = 10;
+MAXRESULTS = 50;
 WIKILANG = "en";
 
 MainAssistant.prototype.setup = function() {
@@ -25,10 +26,12 @@ MainAssistant.prototype.setup = function() {
 	{
 		WIKILANG = wppref.lang;
 		RADIUS = wppref.radius;
+		MAXRESULTS = wppref.maxresults;
 		this.donate = wppref.donate; 
 	} else {
 		WIKILANG = "en";
 		RADIUS = 10;
+		MAXRESULTS = 50;
 		this.donate = true;
 	}
 
@@ -124,55 +127,72 @@ var worklines =  worktext.split("<tr");
 
 places = [];
 
-for (i=1;i<worklines.length;i++) {
-
-var workline = worklines[i];
-
-var lati = workline.split("</td>");
-lati = lati[0].split("<td>");
-lati = lati[1];
-
-var longi = workline.split("</td>");
-longi = longi[1].split("<td>");
-longi = longi[1];
-
-var link = workline.split("href=\"");
-link = link[1].split("</a>");
-link = link[0];
-
-var desc = link.split("\">");
-link = desc[0];
-desc = desc[1];
-
-var distance = this.getDistance(this.poslon,this.poslat,longi,lati);
-//$dist = sin($lat1) * sin($lat2) + cos($lat1)	* cos($lat2) * cos($lon1 - $lon2);
-if (WIKILANG == "en") distance = Math.round(distance * 1000.0*0.000621371192*1000.0)/1000.0;
-else distance = Math.round(distance *1000.0);
-
-var splitdesc = desc.split(" ");
-for (ii=0; ii<splitdesc.length;ii++){
-	if (splitdesc[ii].length > 20) splitdesc[ii] = splitdesc[ii].substring(0,20) + "-" + splitdesc[ii].substring(20);
-}
-
-desc = "";
-
-for (j=0; j<splitdesc.length;j++){
-desc = desc + splitdesc[j] + " " ;
-} 
-
-
-//$("debug").innerHTML= lati + "<br>" +longi +"<br>" + desc +"<br>" + link;
-//places.push({dist:dist,lon:longi,lat:lati,link:link,desc:desc});
-if (WIKILANG == "en") {
-	var distanced = distance + " miles";
-	if (desc != "[empty string]") places.push({dist:distance,distd:distanced,lon:longi,lat:lati,link:link,desc:desc});
-}
-
-else {
-	var distanced = distance + " m";
-	if (desc != "[empty string]") places.push({dist:distance,distd:distanced,lon:longi,lat:lati,link:link,desc:desc});
-}
-
+for (i = 1; i < worklines.length; i++) {
+    var workline = worklines[i];
+    
+    var lati = workline.split("</td>");
+    lati = lati[0].split("<td>");
+    lati = lati[1];
+    
+    var longi = workline.split("</td>");
+    longi = longi[1].split("<td>");
+    longi = longi[1];
+    
+    var link = workline.split("href=\"");
+    link = link[1].split("</a>");
+    link = link[0];
+    
+    var desc = link.split("\">");
+    link = desc[0];
+    desc = desc[1];
+    
+    var distance = this.getDistance(this.poslon, this.poslat, longi, lati);
+    //$dist = sin($lat1) * sin($lat2) + cos($lat1)	* cos($lat2) * cos($lon1 - $lon2);
+    if (WIKILANG == "en") 
+        distance = Math.round(distance * 1000.0 * 0.000621371192 * 1000.0) / 1000.0;
+    else 
+        distance = Math.round(distance * 1000.0);
+    
+    var splitdesc = desc.split(" ");
+    for (ii = 0; ii < splitdesc.length; ii++) {
+        if (splitdesc[ii].length > 20) 
+            splitdesc[ii] = splitdesc[ii].substring(0, 20) + "-" + splitdesc[ii].substring(20);
+    }
+    
+    desc = "";
+    
+    for (j = 0; j < splitdesc.length; j++) {
+        desc = desc + splitdesc[j] + " ";
+    }
+    
+    
+    //$("debug").innerHTML= lati + "<br>" +longi +"<br>" + desc +"<br>" + link;
+    //places.push({dist:dist,lon:longi,lat:lati,link:link,desc:desc});
+    if (WIKILANG == "en") {
+        var distanced = distance + " miles";
+        if (desc != "[empty string]") 
+            places.push({
+                dist: distance,
+                distd: distanced,
+                lon: longi,
+                lat: lati,
+                link: link,
+                desc: desc
+            });
+    }
+    
+    else {
+        var distanced = distance + " m";
+        if (desc != "[empty string]") 
+            places.push({
+                dist: distance,
+                distd: distanced,
+                lon: longi,
+                lat: lati,
+                link: link,
+                desc: desc
+            });
+    }
 }
 
 if(this.donate)
@@ -185,6 +205,15 @@ if (places.length <= 0) {
 
 
 places.sort(this.sortNumber);
+
+var placesTmp = [];
+
+for(m=0; m<places.length; m++) {
+	if(m <= MAXRESULTS)
+		placesTmp.push(places[m]);
+}
+
+places = placesTmp;
 
 listModel.items = places;
 this.controller.modelChanged(listModel);

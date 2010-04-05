@@ -16,10 +16,12 @@ PreferencesAssistant.prototype.setup = function() {
 	{	
 		WIKILANG = wppref.lang;
 		RADIUS = wppref.radius;  
+		MAXRESULTS = wppref.maxresults;
 		this.donate = wppref.donate; 
 	} else {
 		WIKILANG = "en";
 		RADIUS = 10;
+		MAXRESULTS = 50;
 		this.donate = true;
 	}
 
@@ -60,6 +62,22 @@ PreferencesAssistant.prototype.setup = function() {
 	this.controller.modelChanged(selectorsModel2);
 
 
+	this.maxresultschoice = [];
+	selectorsModel3 = { maxresults: MAXRESULTS };
+
+	this.controller.listen('maxresultsselector', Mojo.Event.propertyChange, this.selectorChanged3.bindAsEventListener(this));
+	this.controller.setupWidget('maxresultsselector', {label: $L("Max Results"), choices: this.maxresultschoice, modelProperty:'maxresults'}, selectorsModel3);
+	
+	selectorsModel3.choices = [
+		{ label: "10", value:"10" },
+		{ label: "25", value:"25" },
+		{ label: "50", value:"50" },
+		{ label: "100", value:"100" },
+		{ label: "200", value:"200" },
+	];
+	this.controller.modelChanged(selectorsModel3);
+
+
 	tdattr = {trueLabel: 'yes', falseLabel: 'no'};
 	tdModel = {value: this.donate, disabled: false};
 	
@@ -72,6 +90,7 @@ PreferencesAssistant.prototype.selectorChanged = function(event) {
 	cookie.put({
 		lang: event.value,
 		radius: RADIUS,
+		maxresults: MAXRESULTS,
 		donate: tdModel.value,
 	});
 	WIKILANG = event.value;
@@ -82,9 +101,21 @@ PreferencesAssistant.prototype.selectorChanged2 = function(event) {
 	cookie.put({
 		lang: WIKILANG,
 		radius: event.value,
+		maxresults: MAXRESULTS,
 		donate: tdModel.value,
 	});
 	RADIUS = event.value;
+};
+
+PreferencesAssistant.prototype.selectorChanged3 = function(event) {
+	var cookie = new Mojo.Model.Cookie("wppref");
+	cookie.put({
+		lang: WIKILANG,
+		radius: RADIUS,
+		maxresults: event.value,
+		donate: tdModel.value,
+	});
+	MAXRESULTS = event.value;
 };
 
 PreferencesAssistant.prototype.togglePressed = function(event) {
@@ -92,6 +123,7 @@ PreferencesAssistant.prototype.togglePressed = function(event) {
 	cookie.put({
 		lang: WIKILANG,
 		radius: RADIUS,
+		maxresults: MAXRESULTS,
 		donate: tdModel.value,
 	});
 };
