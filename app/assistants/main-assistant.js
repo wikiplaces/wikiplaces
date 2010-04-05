@@ -209,7 +209,7 @@ places.sort(this.sortNumber);
 var placesTmp = [];
 
 for(m=0; m<places.length; m++) {
-	if(m <= MAXRESULTS)
+	if(m < MAXRESULTS)
 		placesTmp.push(places[m]);
 }
 
