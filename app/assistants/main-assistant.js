@@ -168,30 +168,35 @@ for (i = 1; i < worklines.length; i++) {
     
     //$("debug").innerHTML= lati + "<br>" +longi +"<br>" + desc +"<br>" + link;
     //places.push({dist:dist,lon:longi,lat:lati,link:link,desc:desc});
+	
+	Mojo.Log.error(desc);
+	
     if (WIKILANG == "en") {
         var distanced = distance + " miles";
-        if (desc != "[empty string]") 
-            places.push({
-                dist: distance,
-                distd: distanced,
-                lon: longi,
-                lat: lati,
-                link: link,
-                desc: desc
-            });
-    }
-    
-    else {
+        if (desc != "[empty string] " && desc != "? ") {
+			Mojo.Log.error(desc);
+			places.push({
+				dist: distance,
+				distd: distanced,
+				lon: longi,
+				lat: lati,
+				link: link,
+				desc: desc
+			});
+		}
+    } else {
         var distanced = distance + " m";
-        if (desc != "[empty string]") 
-            places.push({
-                dist: distance,
-                distd: distanced,
-                lon: longi,
-                lat: lati,
-                link: link,
-                desc: desc
-            });
+        if (desc != "[empty string] " && desc != "? ") {
+			Mojo.Log.error(desc);
+			places.push({
+				dist: distance,
+				distd: distanced,
+				lon: longi,
+				lat: lati,
+				link: link,
+				desc: desc
+			});
+		}
     }
 }
 
