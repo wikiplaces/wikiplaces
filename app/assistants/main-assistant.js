@@ -178,7 +178,8 @@ for (i = 1; i < worklines.length; i++) {
 				lon: longi,
 				lat: lati,
 				link: link,
-				desc: desc
+				desc: desc,
+				wikilang: WIKILANG
 			});
 		}
     } else {
@@ -190,7 +191,8 @@ for (i = 1; i < worklines.length; i++) {
 				lon: longi,
 				lat: lati,
 				link: link,
-				desc: desc
+				desc: desc,
+				wikilang: WIKILANG
 			});
 		}
     }
