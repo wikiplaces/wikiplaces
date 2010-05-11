@@ -4,6 +4,17 @@ function DialogAssistant(sceneAssistant) {
 }
 
 DialogAssistant.prototype.setup = function(widget) {
+	this.controller.setupWidget('lookup', 
+		this.atts = {
+			type: Mojo.Widget.activityButton
+		}, 
+		this.model = {
+			buttonLabel: 'Lookup',
+			buttonClass: 'affirmative',
+			disabled: false
+		}
+	);
+	
 	this.lookup = this.lookup.bindAsEventListener(this);
 	//this.cancel = this.cancel.bindAsEventListener(this);
 	
