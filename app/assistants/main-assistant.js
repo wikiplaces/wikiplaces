@@ -1,5 +1,6 @@
-function MainAssistant() {
-
+function MainAssistant(args) {
+	if(args != null)
+		this.location = args;
 }
 
 RADIUS = 10;
@@ -14,7 +15,8 @@ MainAssistant.prototype.setup = function() {
 		items: [
 			{ label: $L("About"), command: 'about' },
 			{ label: $L("Preferences"), command: 'preferences' },
-			{ label: $L("Look again"), command: 'refresh' }
+			{ label: $L("Look around You"), command: 'refresh' },
+			{ label: $L("Look around City"), command: 'setcity' }
 		]
 	};
 
@@ -59,8 +61,15 @@ MainAssistant.prototype.setup = function() {
 
 	//this.controller.listen(this.controller.get('getcords'),Mojo.Event.tap, this.getcordsButtonPressed.bind(this));
 	this.controller.listen("plist", Mojo.Event.listTap, this.plistTapped.bindAsEventListener(this));
-	this.getcordsButtonPressed();
-
+	
+	if(this.location == null)
+		this.getcordsButtonPressed();
+	else {
+		var lon = this.location.split(";")[0];
+		var lat = this.location.split(";")[1];
+		this.findAround(lon, lat);
+	}
+		
 };
 
 MainAssistant.prototype.plistTapped = function(event) {
@@ -101,10 +110,15 @@ this.controller.serviceRequest('palm://com.palm.location', {
 
 };
 
-MainAssistant.prototype.GPSsuccess = function(response) {
-this.poslon = response.longitude;
-this.poslat = response.latitude;
-var url = "http://toolserver.org/~dispenser/cgi-bin/locateCoord.py?dbname=coord_"+WIKILANG+"wiki&lon="+response.longitude+"&lat="+response.latitude+"&range_km=" + RADIUS;
+MainAssistant.prototype.GPSsuccess = function(response){
+	this.findAround(response.longitude, response.latitude);
+}
+
+MainAssistant.prototype.findAround = function(mylon, mylat){
+this.poslon = mylon;
+this.poslat = mylat;
+var url = "http://toolserver.org/~dispenser/cgi-bin/locateCoord.py?dbname=coord_"+WIKILANG+"wiki&lon="+this.poslon+"&lat="+this.poslat+"&range_km=" + RADIUS;
+
 var request = new Ajax.Request(url, {
 method: 'get',
 onSuccess: this.request1Success.bind(this),
@@ -248,14 +262,20 @@ Mojo.Controller.errorDialog( "failed to get content");
 
 };
 
-
-
 MainAssistant.prototype.GPSfail = function(response) {
-Mojo.Controller.errorDialog( "failed to get position");
-
+	Mojo.Controller.errorDialog( "failed to get position");
 };
+
 MainAssistant.prototype.activate = function(event) {
 
+};
+
+MainAssistant.prototype.setCityLocation = function(event) {
+	this.controller.showDialog({
+		template: 'main/dialog-scene',
+		assistant: new DialogAssistant(this),
+		preventCancel: false
+	});
 };
 
 MainAssistant.prototype.deactivate = function(event) {
@@ -277,6 +297,9 @@ MainAssistant.prototype.handleCommand = function(event){
 				break;
 			case 'refresh':
 				this.getcordsButtonPressed();
+				break;	
+			case 'setcity':
+				this.setCityLocation();
 				break;	
 		}
 	}
