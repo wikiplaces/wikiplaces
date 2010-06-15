@@ -1,9 +1,9 @@
 {
 	"id": "de.omoco.wikiplaces1",
-	"version": "1.0.5",
+	"version": "1.1.0",
 	"vendor": "wikiplaces.omoco.de",
 	"type": "web",
 	"main": "index.html",
-	"title": "Wikiplaces",
+	"title": "Neighborhood Guide",
 	"icon": "icon.png"
 }

@@ -50,7 +50,7 @@ MainAssistant.prototype.setup = function() {
 
 	wordList = [];
 
-	listModel = {listTitle:$L('Wikiplaces next to you'), items:wordList};
+	listModel = {listTitle:$L('Places next to you'), items:wordList};
 
         // Set up the attributes & model for the List widget:
         this.controller.setupWidget('plist',
