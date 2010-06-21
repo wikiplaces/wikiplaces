@@ -17,12 +17,12 @@ PreferencesAssistant.prototype.setup = function() {
 		WIKILANG = wppref.lang;
 		RADIUS = wppref.radius;  
 		MAXRESULTS = wppref.maxresults;
-		this.donate = wppref.donate; 
+		//this.donate = wppref.donate; 
 	} else {
 		WIKILANG = "en";
 		RADIUS = 10;
 		MAXRESULTS = 50;
-		this.donate = true;
+		//this.donate = true;
 	}
 
 	var countryname = "English";
@@ -78,11 +78,11 @@ PreferencesAssistant.prototype.setup = function() {
 	this.controller.modelChanged(selectorsModel3);
 
 
-	tdattr = {trueLabel: 'yes', falseLabel: 'no'};
+	/*tdattr = {trueLabel: 'yes', falseLabel: 'no'};
 	tdModel = {value: this.donate, disabled: false};
 	
 	this.controller.setupWidget('donatetoggle', tdattr, tdModel);
-	Mojo.Event.listen(this.controller.get('donatetoggle'),Mojo.Event.propertyChange,this.togglePressed.bind(this));
+	Mojo.Event.listen(this.controller.get('donatetoggle'),Mojo.Event.propertyChange,this.togglePressed.bind(this));*/
 };
 
 PreferencesAssistant.prototype.selectorChanged = function(event) {
@@ -91,7 +91,7 @@ PreferencesAssistant.prototype.selectorChanged = function(event) {
 		lang: event.value,
 		radius: RADIUS,
 		maxresults: MAXRESULTS,
-		donate: tdModel.value,
+		//donate: tdModel.value,
 	});
 	WIKILANG = event.value;
 };
@@ -102,7 +102,7 @@ PreferencesAssistant.prototype.selectorChanged2 = function(event) {
 		lang: WIKILANG,
 		radius: event.value,
 		maxresults: MAXRESULTS,
-		donate: tdModel.value,
+		//donate: tdModel.value,
 	});
 	RADIUS = event.value;
 };
@@ -113,12 +113,12 @@ PreferencesAssistant.prototype.selectorChanged3 = function(event) {
 		lang: WIKILANG,
 		radius: RADIUS,
 		maxresults: event.value,
-		donate: tdModel.value,
+		//donate: tdModel.value,
 	});
 	MAXRESULTS = event.value;
 };
 
-PreferencesAssistant.prototype.togglePressed = function(event) {
+/*PreferencesAssistant.prototype.togglePressed = function(event) {
 	var cookie = new Mojo.Model.Cookie("wppref");
 	cookie.put({
 		lang: WIKILANG,
@@ -126,7 +126,7 @@ PreferencesAssistant.prototype.togglePressed = function(event) {
 		maxresults: MAXRESULTS,
 		donate: tdModel.value,
 	});
-};
+};*/
 
 PreferencesAssistant.prototype.activate = function(event) {
 

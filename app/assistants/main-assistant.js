@@ -29,12 +29,12 @@ MainAssistant.prototype.setup = function() {
 		WIKILANG = wppref.lang;
 		RADIUS = wppref.radius;
 		MAXRESULTS = wppref.maxresults;
-		this.donate = wppref.donate; 
+		//this.donate = wppref.donate; 
 	} else {
 		WIKILANG = "en";
 		RADIUS = 10;
 		MAXRESULTS = 50;
-		this.donate = true;
+		//this.donate = true;
 	}
 
 	this.controller.setupWidget("spinnerId",
@@ -94,7 +94,7 @@ MainAssistant.prototype.preferencesButtonPressed = function(event){
 MainAssistant.prototype.getcordsButtonPressed = function(event) {
 
 $("nowhere").style.display="none";
-$('donatemessage').style.display = "none";
+//$('donatemessage').style.display = "none";
 $("loading").style.display="block";
 
 listModel.items = [];
@@ -212,12 +212,12 @@ for (i = 1; i < worklines.length; i++) {
     }
 }
 
-if(this.donate)
-	this.controller.get('donatemessage').style.display = "block";
+//if(this.donate)
+//	this.controller.get('donatemessage').style.display = "block";
 
 if (places.length <= 0) {
 	$("nowhere").style.display = "block";
-	$("donatemessage").style.display = "none";
+	//$("donatemessage").style.display = "none";
 }
 
 
