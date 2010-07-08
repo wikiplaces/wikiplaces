@@ -22,6 +22,22 @@ MainAssistant.prototype.setup = function() {
 
 	this.controller.setupWidget(Mojo.Menu.appMenu, {omitDefaultItems: true}, this.appMenuModel);
 
+	AdMob.ad.initialize({
+		pub_id: 'XXX',
+		bg_color: '#ccc',
+		text_color: '#333',
+		test_mode: false
+	});
+	
+	AdMob.ad.request({
+		onSuccess: (function (ad) {
+			this.controller.get('admob_ad').insert(ad);
+		}).bind(this),
+		onFailure: (function () {}).bind(this),
+	});
+	
+	this.newadauto.bind(this).delay(60);
+
 	var cookie = new Mojo.Model.Cookie("wppref");
 	var wppref = cookie.get();
 	if(wppref != null)
@@ -71,6 +87,17 @@ MainAssistant.prototype.setup = function() {
 	}
 		
 };
+
+MainAssistant.prototype.newadauto = function(event) {
+	AdMob.ad.request({
+		onSuccess: (function(ad){
+			this.controller.get('admob_ad').childElements()[0].replace(ad);
+		}).bind(this),
+		onFailure: (function(){}).bind(this),
+	});
+	
+	this.newadauto.bind(this).delay(60);
+}
 
 MainAssistant.prototype.plistTapped = function(event) {
 //Mojo.Controller.errorDialog(places[event.index].link);
